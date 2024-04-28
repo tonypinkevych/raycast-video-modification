@@ -52,7 +52,7 @@ export class Binary {
 
     try {
       this.onStatusChange?.("Downloading");
-      await new RemoteFile(this.data.url, new LocalFile(path.join(tempDir, name))).content();
+      await new RemoteFile(this.data.url, new LocalFile(path.join(tempDir, name))).stream();
     } catch (error) {
       console.error("Downloading ffmpeg error", error);
       throw new Error("Could not installed ffmpeg cli");

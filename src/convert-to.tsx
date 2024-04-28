@@ -1,11 +1,10 @@
-import { Action, ActionPanel, List, Toast, environment, showToast } from "@raycast/api";
-import fs from "fs";
-import * as path from "path";
+import { Action, ActionPanel, List, Toast, showToast } from "@raycast/api";
 import { useState } from "react";
 import { Ffmpeg } from "./objects/ffmpeg";
+import { Gif } from "./objects/gif";
 import { SelectedFinderFiles } from "./objects/selected-finder.videos";
+import { Video } from "./objects/video";
 import { loggable } from "./utils/loggable";
-import { withNewExtenstion } from "./utils/with-new-extension";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(false);
@@ -30,19 +29,13 @@ export default function Command() {
 
     for (const video of selectedVideos) {
       try {
-        const videoPath = video.path();
-        const sourceDirPath = path.dirname(videoPath);
-        const videoName = path.basename(videoPath);
-        const targetVideoPath = path.join(sourceDirPath, withNewExtenstion(videoName, ".mp4"));
-        await ffmpeg.exec({
-          input: videoPath,
-          output: targetVideoPath,
-        });
+        await loggable(new Video(video, ffmpeg)).encode({ format: "mp4" });
       } catch (err: any) {
         await showToast({
           title: err.message,
           style: Toast.Style.Failure,
         });
+        return;
       }
     }
 
@@ -61,19 +54,13 @@ export default function Command() {
 
     for (const video of selectedVideos) {
       try {
-        const videoPath = video.path();
-        const sourceDirPath = path.dirname(videoPath);
-        const videoName = path.basename(videoPath);
-        const targetVideoPath = path.join(sourceDirPath, withNewExtenstion(videoName, ".webm"));
-        await ffmpeg.exec({
-          input: videoPath,
-          output: targetVideoPath,
-        });
+        await loggable(new Video(video, ffmpeg)).encode({ format: "webm" });
       } catch (err: any) {
         await showToast({
           title: err.message,
           style: Toast.Style.Failure,
         });
+        return;
       }
     }
 
@@ -91,36 +78,14 @@ export default function Command() {
     }
 
     for (const video of selectedVideos) {
-      const videoPath = video.path();
-      const sourceDirPath = path.dirname(videoPath);
-      const videoName = path.basename(videoPath);
-      const targetVideoPath = path.join(sourceDirPath, withNewExtenstion(videoName, ".gif"));
-      const baseFolderPath = environment.supportPath;
-      // @TODO: provide through properties or arguments
-      const frameRate = 30;
-
       try {
-        await ffmpeg.exec({
-          input: videoPath,
-          params: [`-vf "fps=${frameRate},palettegen=stats_mode=diff"`],
-          output: `${baseFolderPath}/palette.png`,
-        });
-        await ffmpeg.exec({
-          input: videoPath,
-          params: [
-            `-r ${frameRate}`,
-            `-i "${baseFolderPath}/palette.png"`,
-            `-lavfi "fps=${frameRate} [x]; [x][1:v] paletteuse"`,
-          ],
-          output: targetVideoPath,
-        });
+        await loggable(new Gif(video, ffmpeg)).encode();
       } catch (err: any) {
         await showToast({
           title: err.message,
           style: Toast.Style.Failure,
         });
-      } finally {
-        fs.rmSync(`${baseFolderPath}/palette.png`);
+        return;
       }
     }
 

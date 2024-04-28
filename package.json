@@ -31,15 +31,15 @@
           "data": [
             {
               "title": "Best quality",
-              "value": "veryslow"
+              "value": "best-quality"
             },
             {
-              "title": "Normal",
-              "value": "medium"
+              "title": "Optimal",
+              "value": "optimal"
             },
             {
               "title": "Best size",
-              "value": "veryfast"
+              "value": "best-size"
             }
           ],
           "required": true

@@ -1,13 +1,15 @@
 import { Toast, showToast } from "@raycast/api";
 import * as path from "path";
 import { Ffmpeg } from "./objects/ffmpeg";
+import { Gif } from "./objects/gif";
 import { SelectedFinderFiles } from "./objects/selected-finder.videos";
-import { withNewExtenstion } from "./utils/with-new-extension";
+import { Video } from "./objects/video";
+import { loggable } from "./utils/loggable";
 
 export default async function Command(props: { arguments: { width: string; height: string } }) {
-  const { width, height } = props.arguments;
+  const { width: providedWidth, height: providedHeight } = props.arguments;
 
-  if (!width && !height) {
+  if (!providedWidth && !providedHeight) {
     await showToast({ title: "Width or Height should be proivded", style: Toast.Style.Failure });
     return;
   }
@@ -26,26 +28,19 @@ export default async function Command(props: { arguments: { width: string; heigh
   });
 
   for (const video of files) {
+    const width = !!providedWidth ? parseInt(providedWidth, 10) : undefined;
+    const height = !!providedHeight ? parseInt(providedHeight, 10) : undefined;
+
     try {
-      const videoPath = video.path();
-      const sourceDirPath = path.dirname(videoPath);
-      const videoName = path.basename(videoPath, path.extname(videoPath));
-      const extension = path.extname(videoPath);
-      const targetVideoPath = path.join(
-        sourceDirPath,
-        withNewExtenstion(`${videoName}-${width}x${height}${extension}`, extension),
-      );
-      await ffmpeg.exec({
-        input: videoPath,
-        params: [
-          !!width && !height ? `-vf scale=${width}:-2` : undefined,
-          !width && !!height ? `-vf scale=-2:${height}` : undefined,
-          !!width && !!height ? `-vf scale=${width}:${height}` : undefined,
-        ],
-        output: targetVideoPath,
-      });
+      const extension = path.extname(video.path());
+      if (extension === ".gif") {
+        await loggable(new Gif(video, ffmpeg)).encode({ width, height });
+      } else {
+        await loggable(new Video(video, ffmpeg)).encode({ width, height });
+      }
     } catch (err: any) {
       await showToast({ title: err.message, style: Toast.Style.Failure });
+      return;
     }
   }
 

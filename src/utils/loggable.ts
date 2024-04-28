@@ -18,11 +18,16 @@ export const loggable = <T extends { [key: string]: any }>(target: T, logger: Lo
           const result = target[prop].apply(target, args);
 
           if (result instanceof Promise) {
-            return result.then((r) => {
-              const end = performance.now();
-              logger.log(`${target.constructor.name}.${prop.toString()} finished ${(end - start).toFixed(2)}ms`);
-              return r;
-            });
+            return result
+              .then((r) => {
+                const end = performance.now();
+                logger.log(`${target.constructor.name}.${prop.toString()} finished ${(end - start).toFixed(2)}ms`);
+                return r;
+              })
+              .catch((err) => {
+                logger.error(err);
+                throw err;
+              });
           }
 
           const end = performance.now();

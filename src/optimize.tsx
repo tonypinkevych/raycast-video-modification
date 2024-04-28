@@ -2,10 +2,10 @@ import { Toast, showToast } from "@raycast/api";
 import * as path from "path";
 import { Ffmpeg } from "./objects/ffmpeg";
 import { SelectedFinderFiles } from "./objects/selected-finder.videos";
+import { Video } from "./objects/video";
 import { loggable } from "./utils/loggable";
-import { withNewExtenstion } from "./utils/with-new-extension";
 
-export default async function Command(props: { arguments: { preset: "veryslow" | "medium" | "veryfast" } }) {
+export default async function Command(props: { arguments: { preset: "best-size" | "optimal" | "best-quality" } }) {
   const { preset } = props.arguments;
   const files = await new SelectedFinderFiles().list();
 
@@ -24,21 +24,15 @@ export default async function Command(props: { arguments: { preset: "veryslow" |
 
   for (const video of files) {
     try {
-      const videoPath = video.path();
-      const sourceDirPath = path.dirname(videoPath);
-      const videoName = path.basename(videoPath, path.extname(videoPath));
-      const extension = path.extname(videoPath);
-      const targetVideoPath = path.join(
-        sourceDirPath,
-        withNewExtenstion(`${videoName}-${preset}${extension}`, extension),
-      );
-      await ffmpeg.exec({
-        input: videoPath,
-        params: ["-c:v libx265", `-preset ${preset}`],
-        output: targetVideoPath,
-      });
+      const extension = path.extname(video.path());
+      if (extension === ".gif") {
+        throw new Error("Does not applicable to GIFs yet");
+      } else {
+        await loggable(new Video(video, ffmpeg)).encode({ preset });
+      }
     } catch (err: any) {
       await showToast({ title: err.message, style: Toast.Style.Failure });
+      return;
     }
   }
 
