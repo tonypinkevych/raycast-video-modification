@@ -1,4 +1,5 @@
-import { Action, ActionPanel, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, List, Toast, showToast, useNavigation } from "@raycast/api";
+import { getProgressIcon } from "@raycast/utils";
 import { useState } from "react";
 import { Ffmpeg } from "./objects/ffmpeg";
 import { Ffprobe } from "./objects/ffprobe";
@@ -8,21 +9,34 @@ import { Video } from "./objects/video";
 import { loggable } from "./utils/loggable";
 
 export default function Command() {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [progress, setProgress] = useState<number | undefined>(undefined);
+  const [type, setType] = useState<"mp4" | "webm" | "gif" | undefined>();
+  const { pop } = useNavigation();
 
   const files = loggable(new SelectedFinderFiles());
   const ffmpeg = loggable(
-    new Ffmpeg(loggable(new Ffprobe()), {
-      onStatusChange: async (status) => {
-        await showToast({ title: status, style: Toast.Style.Animated });
+    new Ffmpeg(
+      loggable(
+        new Ffprobe({
+          onStatusChange: async (status) => {
+            await showToast({ title: status, style: Toast.Style.Animated });
+          },
+        }),
+      ),
+      {
+        onStatusChange: async (status) => {
+          await showToast({ title: status, style: Toast.Style.Animated });
+        },
+        onProgressChange: (progress) => {
+          setProgress(progress);
+        },
       },
-      onProgressChange: (progress) => {
-        console.log(">>>", progress);
-      },
-    }),
+    ),
   );
 
   const encodeMp4 = async () => {
+    setType("mp4");
     setIsLoading(true);
     const selectedVideos = await files.list();
 
@@ -45,9 +59,13 @@ export default function Command() {
 
     await showToast({ title: "All videos processed", style: Toast.Style.Success });
     setIsLoading(false);
+    setProgress(undefined);
+    setType(undefined);
+    pop();
   };
 
   const encodeWebm = async () => {
+    setType("webm");
     setIsLoading(true);
     const selectedVideos = await files.list();
 
@@ -70,9 +88,13 @@ export default function Command() {
 
     await showToast({ title: "All videos processed", style: Toast.Style.Success });
     setIsLoading(false);
+    setProgress(undefined);
+    setType(undefined);
+    pop();
   };
 
   const encodeGif = async () => {
+    setType("gif");
     setIsLoading(true);
     const selectedVideos = await files.list();
 
@@ -95,12 +117,15 @@ export default function Command() {
 
     await showToast({ title: "All videos processed", style: Toast.Style.Success });
     setIsLoading(false);
+    setProgress(undefined);
+    setType(undefined);
+    pop();
   };
 
   return (
     <List isLoading={isLoading}>
       <List.Item
-        icon="list-icon.png"
+        icon={progress != null && type === "mp4" ? getProgressIcon(progress, "#374FD5") : "list-icon.png"}
         title="mp4"
         actions={
           <ActionPanel>
@@ -110,7 +135,7 @@ export default function Command() {
       />
 
       <List.Item
-        icon="list-icon.png"
+        icon={progress != null && type === "webm" ? getProgressIcon(progress, "#374FD5") : "list-icon.png"}
         title="webm"
         actions={
           <ActionPanel>
@@ -120,7 +145,7 @@ export default function Command() {
       />
 
       <List.Item
-        icon="list-icon.png"
+        icon={progress != null && type === "gif" ? getProgressIcon(progress, "#374FD5") : "list-icon.png"}
         title="gif"
         actions={
           <ActionPanel>

@@ -16,14 +16,23 @@ export default async function Command(props: { arguments: { preset: "smallest-si
   }
 
   const ffmpeg = loggable(
-    new Ffmpeg(loggable(new Ffprobe()), {
-      onStatusChange: async (status) => {
-        await showToast({ title: status, style: Toast.Style.Animated });
+    new Ffmpeg(
+      loggable(
+        new Ffprobe({
+          onStatusChange: async (status) => {
+            await showToast({ title: status, style: Toast.Style.Animated });
+          },
+        }),
+      ),
+      {
+        onStatusChange: async (status) => {
+          await showToast({ title: status, style: Toast.Style.Animated });
+        },
+        onProgressChange: (progress) => {
+          console.log(">>>", progress);
+        },
       },
-      onProgressChange: (progress) => {
-        console.log(">>>", progress);
-      },
-    }),
+    ),
   );
 
   for (const video of files) {
