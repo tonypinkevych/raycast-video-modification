@@ -52,7 +52,7 @@ export class Binary {
     }
 
     try {
-      this.onStatusChange?.("Downloading");
+      this.onStatusChange?.("Downloading binaries");
       await new RemoteFile(this.data.url, new LocalFile(path.join(tempDir, name))).stream();
     } catch (error) {
       console.error("Downloading ffmpeg error", error);
