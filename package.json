@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "video-modification",
+  "title": "Video Modification",
+  "description": "Allows to modify videos using ffmpeg",
+  "icon": "command-icon.png",
+  "author": "tonypinkevych",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Index",
+      "subtitle": "Convert selected videos to any format",
+      "description": "Template for showing a static list and a detail view",
+      "mode": "view"
+    },
+    {
+      "name": "convert-to",
+      "title": "Convert to ...",
+      "subtitle": "Convert selected videos to any format",
+      "description": "Test",
+      "mode": "view"
+    },
+    {
+      "name": "optimize-mp4",
+      "title": "Optimize mp4",
+      "subtitle": "Subtitle fire",
+      "description": "Test",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "preset",
+          "placeholder": "Preset",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Best quality",
+              "value": "veryslow"
+            },
+            {
+              "title": "Normal",
+              "value": "medium"
+            },
+            {
+              "title": "Best size",
+              "value": "veryfast"
+            }
+          ],
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "resize-mp4",
+      "title": "Resize mp4",
+      "subtitle": "Subtitle fire",
+      "description": "Test",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "width",
+          "placeholder": "Width",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "height",
+          "placeholder": "Height",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.72.1",
+    "@raycast/utils": "^1.14.1",
+    "axios": "^1.6.8",
+    "decompress": "^4.2.1",
+    "unzipper": "^0.11.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/decompress": "^4.2.7",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "@types/unzipper": "^0.10.9",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "prettier-plugin-organize-imports": "^3.2.4",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
