@@ -1,55 +1,48 @@
 import { Action, ActionPanel, List, Toast, showToast } from "@raycast/api";
-import { exec } from "child_process";
 import * as path from "path";
 import { useState } from "react";
-import { getSelectedVideos, withNewExtenstion } from "./utils";
-import { getCli } from "./utils/cli";
+import { Ffmpeg } from "./objects/ffmpeg";
+import { SelectedFinderFiles } from "./objects/selected-finder.videos";
+import { loggable } from "./utils/loggable";
+import { withNewExtenstion } from "./utils/with-new-extension";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(false);
 
+  const files = loggable(new SelectedFinderFiles());
+  const ffmpeg = loggable(
+    new Ffmpeg({
+      onStatusChange: async (status) => {
+        await showToast({ title: status, style: Toast.Style.Animated });
+      },
+    }),
+  );
+
   const encodeMp4 = async () => {
     setIsLoading(true);
-    const selectedVideos = await getSelectedVideos();
+    const selectedVideos = await files.list();
 
     if (selectedVideos.length === 0) {
       await showToast({ title: "Please select any video in Finder", style: Toast.Style.Failure });
       return;
     }
 
-    const ffmpegCli = await getCli(async (status) => {
-      await showToast({ title: status, style: Toast.Style.Animated });
-    });
-
     for (const video of selectedVideos) {
-      const sourceDirPath = path.dirname(video);
-      const videoName = path.basename(video);
-
-      await showToast({ title: `Processing "${videoName}"`, style: Toast.Style.Animated });
-
-      const targetVideo = path.join(sourceDirPath, withNewExtenstion(videoName, ".mp4"));
-
-      if (video === targetVideo) {
+      try {
+        const videoPath = video.path();
+        const sourceDirPath = path.dirname(videoPath);
+        const videoName = path.basename(videoPath);
+        const targetVideoPath = path.join(sourceDirPath, withNewExtenstion(videoName, ".mp4"));
+        await ffmpeg.exec({
+          input: videoPath,
+          output: targetVideoPath,
+        });
+      } catch (err: any) {
         await showToast({
-          title: "Selected video cannot be converted into the same format",
+          title: err.message,
           style: Toast.Style.Failure,
         });
-        return;
       }
-
-      await new Promise<void>((resolve, reject) => {
-        exec(`"${ffmpegCli}" -i "${video}" "${targetVideo}"`, (err, stdout, stderr) => {
-          if (err != null) {
-            console.error(err);
-            reject();
-            return;
-          }
-
-          console.log("!!! stdout", stdout);
-          console.log("!!! stderr", stderr);
-          resolve();
-        });
-      });
     }
 
     await showToast({ title: "All videos processed", style: Toast.Style.Success });
@@ -58,46 +51,29 @@ export default function Command() {
 
   const encodeWebm = async () => {
     setIsLoading(true);
-    const selectedVideos = await getSelectedVideos();
+    const selectedVideos = await files.list();
 
     if (selectedVideos.length === 0) {
       await showToast({ title: "Please select any video in Finder", style: Toast.Style.Failure });
       return;
     }
 
-    const ffmpegCli = await getCli(async (status) => {
-      await showToast({ title: status, style: Toast.Style.Animated });
-    });
-
     for (const video of selectedVideos) {
-      const sourceDirPath = path.dirname(video);
-      const videoName = path.basename(video);
-
-      await showToast({ title: `Processing "${videoName}"`, style: Toast.Style.Animated });
-
-      const targetVideo = path.join(sourceDirPath, withNewExtenstion(videoName, ".webm"));
-
-      if (video === targetVideo) {
+      try {
+        const videoPath = video.path();
+        const sourceDirPath = path.dirname(videoPath);
+        const videoName = path.basename(videoPath);
+        const targetVideoPath = path.join(sourceDirPath, withNewExtenstion(videoName, ".webm"));
+        await ffmpeg.exec({
+          input: videoPath,
+          output: targetVideoPath,
+        });
+      } catch (err: any) {
         await showToast({
-          title: "Selected video cannot be converted into the same format",
+          title: err.message,
           style: Toast.Style.Failure,
         });
-        return;
       }
-
-      await new Promise<void>((resolve, reject) => {
-        exec(`"${ffmpegCli}" -i "${video}" "${targetVideo}"`, (err, stdout, stderr) => {
-          if (err != null) {
-            console.error(err);
-            reject();
-            return;
-          }
-
-          console.log("!!! stdout", stdout);
-          console.log("!!! stderr", stderr);
-          resolve();
-        });
-      });
     }
 
     await showToast({ title: "All videos processed", style: Toast.Style.Success });
@@ -106,44 +82,29 @@ export default function Command() {
 
   const encodeGif = async () => {
     setIsLoading(true);
-    const selectedVideos = await getSelectedVideos();
+    const selectedVideos = await files.list();
 
     if (selectedVideos.length === 0) {
       await showToast({ title: "Please select any video in Finder", style: Toast.Style.Failure });
       return;
     }
 
-    const ffmpegCli = await getCli(async (status) => {
-      await showToast({ title: status, style: Toast.Style.Animated });
-    });
-
     for (const video of selectedVideos) {
-      const sourceDirPath = path.dirname(video);
-      const videoName = path.basename(video);
-
-      const targetVideo = path.join(sourceDirPath, withNewExtenstion(videoName, ".gif"));
-
-      if (video === targetVideo) {
+      try {
+        const videoPath = video.path();
+        const sourceDirPath = path.dirname(videoPath);
+        const videoName = path.basename(videoPath);
+        const targetVideoPath = path.join(sourceDirPath, withNewExtenstion(videoName, ".gif"));
+        await ffmpeg.exec({
+          input: videoPath,
+          output: targetVideoPath,
+        });
+      } catch (err: any) {
         await showToast({
-          title: "Selected video cannot be converted into the same format",
+          title: err.message,
           style: Toast.Style.Failure,
         });
-        return;
       }
-
-      await new Promise<void>((resolve, reject) => {
-        exec(`"${ffmpegCli}" -i "${video}" "${targetVideo}"`, (err, stdout, stderr) => {
-          if (err != null) {
-            console.error(err);
-            reject();
-            return;
-          }
-
-          console.log("!!! stdout", stdout);
-          console.log("!!! stderr", stderr);
-          resolve();
-        });
-      });
     }
 
     await showToast({ title: "All videos processed", style: Toast.Style.Success });

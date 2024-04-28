@@ -1,43 +1,45 @@
 import { Toast, showToast } from "@raycast/api";
 import * as path from "path";
-import { getSelectedVideos, runFffmpegCommand, withNewExtenstion } from "./utils";
-import { getCli } from "./utils/cli";
+import { Ffmpeg } from "./objects/ffmpeg";
+import { SelectedFinderFiles } from "./objects/selected-finder.videos";
+import { loggable } from "./utils/loggable";
+import { withNewExtenstion } from "./utils/with-new-extension";
 
 export default async function Command(props: { arguments: { preset: "veryslow" | "medium" | "veryfast" } }) {
   const { preset } = props.arguments;
-  const selectedVideos = await getSelectedVideos();
+  const files = await new SelectedFinderFiles().list();
 
-  if (selectedVideos.length === 0) {
+  if (files.length === 0) {
     await showToast({ title: "Please select any video in Finder", style: Toast.Style.Failure });
     return;
   }
 
-  const ffmpegCli = await getCli(async (status) => {
-    await showToast({ title: status, style: Toast.Style.Animated });
-  });
+  const ffmpeg = loggable(
+    new Ffmpeg({
+      onStatusChange: async (status) => {
+        await showToast({ title: status, style: Toast.Style.Animated });
+      },
+    }),
+  );
 
-  for (const video of selectedVideos) {
-    const sourceDirPath = path.dirname(video);
-    const videoName = path.basename(video, path.extname(video));
-    const extension = path.extname(video);
-    const targetVideo = path.join(sourceDirPath, withNewExtenstion(`${videoName}-${preset}${extension}`, extension));
-
-    if (video === targetVideo) {
-      await showToast({ title: "Selected video cannot be optimized", style: Toast.Style.Failure });
-      return;
+  for (const video of files) {
+    try {
+      const videoPath = video.path();
+      const sourceDirPath = path.dirname(videoPath);
+      const videoName = path.basename(videoPath, path.extname(videoPath));
+      const extension = path.extname(videoPath);
+      const targetVideoPath = path.join(
+        sourceDirPath,
+        withNewExtenstion(`${videoName}-${preset}${extension}`, extension),
+      );
+      await ffmpeg.exec({
+        input: videoPath,
+        params: ["-c:v libx265", `-preset ${preset}`],
+        output: targetVideoPath,
+      });
+    } catch (err: any) {
+      await showToast({ title: err.message, style: Toast.Style.Failure });
     }
-
-    await showToast({ title: `Processing "${videoName}"`, style: Toast.Style.Animated });
-    const command = [
-      `"${ffmpegCli}"`,
-      // accept all prompts
-      "-y",
-      `-i "${video}"`,
-      "-c:v libx264",
-      `-preset ${preset}`,
-      `"${targetVideo}"`,
-    ].join(" ");
-    await runFffmpegCommand(command);
   }
 
   await showToast({ title: "All videos processed", style: Toast.Style.Success });
