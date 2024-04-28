@@ -1,4 +1,5 @@
-import { Action, ActionPanel, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, List, Toast, environment, showToast } from "@raycast/api";
+import fs from "fs";
 import * as path from "path";
 import { useState } from "react";
 import { Ffmpeg } from "./objects/ffmpeg";
@@ -90,13 +91,27 @@ export default function Command() {
     }
 
     for (const video of selectedVideos) {
+      const videoPath = video.path();
+      const sourceDirPath = path.dirname(videoPath);
+      const videoName = path.basename(videoPath);
+      const targetVideoPath = path.join(sourceDirPath, withNewExtenstion(videoName, ".gif"));
+      const baseFolderPath = environment.supportPath;
+      // @TODO: provide through properties or arguments
+      const frameRate = 30;
+
       try {
-        const videoPath = video.path();
-        const sourceDirPath = path.dirname(videoPath);
-        const videoName = path.basename(videoPath);
-        const targetVideoPath = path.join(sourceDirPath, withNewExtenstion(videoName, ".gif"));
         await ffmpeg.exec({
           input: videoPath,
+          params: [`-vf "fps=${frameRate},palettegen=stats_mode=diff"`],
+          output: `${baseFolderPath}/palette.png`,
+        });
+        await ffmpeg.exec({
+          input: videoPath,
+          params: [
+            `-r ${frameRate}`,
+            `-i "${baseFolderPath}/palette.png"`,
+            `-lavfi "fps=${frameRate} [x]; [x][1:v] paletteuse"`,
+          ],
           output: targetVideoPath,
         });
       } catch (err: any) {
@@ -104,6 +119,8 @@ export default function Command() {
           title: err.message,
           style: Toast.Style.Failure,
         });
+      } finally {
+        fs.rmSync(`${baseFolderPath}/palette.png`);
       }
     }
 

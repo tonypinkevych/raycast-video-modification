@@ -18,8 +18,8 @@
       "mode": "view"
     },
     {
-      "name": "optimize-mp4",
-      "title": "Optimize mp4",
+      "name": "optimize",
+      "title": "Optimize",
       "subtitle": "Subtitle fire",
       "description": "Test",
       "mode": "no-view",
@@ -47,8 +47,8 @@
       ]
     },
     {
-      "name": "resize-mp4",
-      "title": "Resize mp4",
+      "name": "resize",
+      "title": "Resize",
       "subtitle": "Subtitle fire",
       "description": "Test",
       "mode": "no-view",
