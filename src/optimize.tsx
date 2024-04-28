@@ -5,7 +5,7 @@ import { SelectedFinderFiles } from "./objects/selected-finder.videos";
 import { Video } from "./objects/video";
 import { loggable } from "./utils/loggable";
 
-export default async function Command(props: { arguments: { preset: "best-size" | "optimal" | "best-quality" } }) {
+export default async function Command(props: { arguments: { preset: "smallest-size" | "optimal" | "best-quality" } }) {
   const { preset } = props.arguments;
   const files = await new SelectedFinderFiles().list();
 

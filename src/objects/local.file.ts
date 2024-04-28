@@ -9,23 +9,37 @@ export class LocalFile implements File {
 
   stream: File["stream"] = async () => fs.createReadStream(this._path);
 
-  nextName: File["nextName"] = (counter: number = 1) => {
+  nextName: File["nextName"] = (options = {}) => {
+    const { extension, counter = 0 } = options;
     const dirPath = path.dirname(this._path);
-    const extension = path.extname(this._path);
-    const baseName = path.basename(this._path, extension);
+    const currentExtension = path.extname(this._path);
+    const baseName = path.basename(this._path, currentExtension);
     const splitted = baseName.split(" ");
     const lastPart = splitted[splitted.length - 1];
     const digitsInName = parseInt(lastPart, 10);
     const isLastPartDigits = digitsInName.toString() === lastPart && Number.isNaN(digitsInName) === false;
     const baseNameWithoutDigits = splitted.slice(0, -1).join(" ");
-    const nextName = isLastPartDigits ? `${baseNameWithoutDigits} ${digitsInName + counter}` : `${baseName} ${counter}`;
-    const nextPath = path.join(dirPath, `${nextName}${extension}`);
+    const nextName = (() => {
+      if (counter === 0) {
+        return baseName;
+      }
+
+      if (isLastPartDigits) {
+        return `${baseNameWithoutDigits} ${digitsInName + counter}`;
+      }
+
+      return `${baseName} ${counter}`;
+    })();
+    const nextPath = path.join(dirPath, `${nextName}${extension ?? currentExtension}`);
 
     if (fs.existsSync(nextPath)) {
-      return this.nextName(counter + 1);
+      return this.nextName({
+        extension,
+        counter: counter + 1,
+      });
     }
 
-    return `${nextName}${extension}`;
+    return `${nextName}${extension ?? currentExtension}`;
   };
 
   write: File["write"] = (content) =>

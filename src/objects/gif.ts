@@ -2,7 +2,6 @@ import { environment } from "@raycast/api";
 import fs from "fs";
 import path from "path";
 import { File } from "../abstractions";
-import { withNewExtenstion } from "../utils/with-new-extension";
 import { Ffmpeg } from "./ffmpeg";
 
 export class Gif {
@@ -21,7 +20,7 @@ export class Gif {
 
     const videoPath = this.file.path();
     const sourceDirPath = path.dirname(videoPath);
-    const targetVideoPath = path.join(sourceDirPath, withNewExtenstion(this.file.nextName(), ".gif"));
+    const targetVideoPath = path.join(sourceDirPath, this.file.nextName({ extension: ".gif" }));
     const baseFolderPath = environment.supportPath;
     // @TODO: provide through properties or arguments
     const frameRate = 30;

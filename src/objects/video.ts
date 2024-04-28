@@ -1,6 +1,5 @@
 import path from "path";
 import { File } from "../abstractions";
-import { withNewExtenstion } from "../utils/with-new-extension";
 import { Ffmpeg } from "./ffmpeg";
 
 export class Video {
@@ -11,7 +10,7 @@ export class Video {
 
   encode = async (
     options: {
-      preset?: "best-size" | "optimal" | "best-quality";
+      preset?: "smallest-size" | "optimal" | "best-quality";
       width?: number;
       height?: number;
       format?: "mp4" | "webm" | "mov";
@@ -22,7 +21,7 @@ export class Video {
     const videoPath = this.file.path();
     const sourceDirPath = path.dirname(videoPath);
     const extension = format ? `.${format}` : path.extname(videoPath);
-    const targetVideoPath = path.join(sourceDirPath, withNewExtenstion(this.file.nextName(), extension));
+    const targetVideoPath = path.join(sourceDirPath, this.file.nextName({ extension }));
 
     const codec = extension === "webm" ? "libvpx-vp9" : "libx264";
     const bitrate = (() => {
@@ -33,7 +32,7 @@ export class Video {
         case "optimal": {
           return "4M";
         }
-        case "best-size": {
+        case "smallest-size": {
           return "2M";
         }
         default: {

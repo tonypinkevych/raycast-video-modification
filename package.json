@@ -38,8 +38,8 @@
               "value": "optimal"
             },
             {
-              "title": "Best size",
-              "value": "best-size"
+              "title": "Smallest size",
+              "value": "smallest-size"
             }
           ],
           "required": true

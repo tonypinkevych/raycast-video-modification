@@ -14,7 +14,18 @@ export type File = {
   /**
    * Return next name. For example in system we have `video.mp4` then this method should return `video 2.mp4`
    */
-  nextName: (counter?: number) => string;
+  nextName: (options?: {
+    /**
+     * If needed to switch extension. Should start with dot e.g. `.gif` or `.mp4`.
+     */
+    extension?: string;
+
+    /**
+     * Which start number of search should be.
+     * @default 1
+     */
+    counter?: number;
+  }) => string;
 
   /**
    * Change content of the file
