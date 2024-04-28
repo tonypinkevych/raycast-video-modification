@@ -1,6 +1,7 @@
 import { Toast, showToast } from "@raycast/api";
 import * as path from "path";
 import { Ffmpeg } from "./objects/ffmpeg";
+import { Ffprobe } from "./objects/ffprobe";
 import { SelectedFinderFiles } from "./objects/selected-finder.videos";
 import { Video } from "./objects/video";
 import { loggable } from "./utils/loggable";
@@ -15,9 +16,12 @@ export default async function Command(props: { arguments: { preset: "smallest-si
   }
 
   const ffmpeg = loggable(
-    new Ffmpeg({
+    new Ffmpeg(loggable(new Ffprobe()), {
       onStatusChange: async (status) => {
         await showToast({ title: status, style: Toast.Style.Animated });
+      },
+      onProgressChange: (progress) => {
+        console.log(">>>", progress);
       },
     }),
   );

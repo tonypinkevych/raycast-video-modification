@@ -45,6 +45,7 @@ export class Binary {
     const binaryPath = path.join(cliDir, this.data.name);
     const tempDir = path.join(environment.supportPath, "temp");
     const name = randomUUID();
+    const tempFile = path.join(tempDir, name);
 
     if (fs.existsSync(binaryPath)) {
       return binaryPath;
@@ -61,7 +62,7 @@ export class Binary {
     try {
       this.onStatusChange?.("Unzipping");
       await afs.mkdir(cliDir, { recursive: true });
-      await decompress(path.join(tempDir, name), cliDir);
+      await decompress(tempFile, cliDir);
     } catch (error) {
       console.error("Extracting binary error", error);
       throw new Error("Could not extract zip content of ffmpeg cli");
@@ -78,7 +79,7 @@ export class Binary {
       console.error("Binary verification failed", error);
       throw new Error("Binary verification failed");
     } finally {
-      await afs.rm(tempDir, { recursive: true });
+      await afs.rm(tempFile, { recursive: true });
     }
 
     try {

@@ -1,6 +1,7 @@
 import { Toast, showToast } from "@raycast/api";
 import * as path from "path";
 import { Ffmpeg } from "./objects/ffmpeg";
+import { Ffprobe } from "./objects/ffprobe";
 import { Gif } from "./objects/gif";
 import { SelectedFinderFiles } from "./objects/selected-finder.videos";
 import { Video } from "./objects/video";
@@ -21,11 +22,16 @@ export default async function Command(props: { arguments: { width: string; heigh
     return;
   }
 
-  const ffmpeg = new Ffmpeg({
-    onStatusChange: async (status) => {
-      await showToast({ title: status, style: Toast.Style.Animated });
-    },
-  });
+  const ffmpeg = loggable(
+    new Ffmpeg(loggable(new Ffprobe()), {
+      onStatusChange: async (status) => {
+        await showToast({ title: status, style: Toast.Style.Animated });
+      },
+      onProgressChange: (progress) => {
+        console.log(">>>", progress);
+      },
+    }),
+  );
 
   for (const video of files) {
     const width = !!providedWidth ? parseInt(providedWidth, 10) : undefined;

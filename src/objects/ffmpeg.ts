@@ -2,6 +2,7 @@ import { exec } from "child_process";
 import os from "os";
 import path from "path";
 import { Binary } from "./binary";
+import { Ffprobe } from "./ffprobe";
 
 /**
  * Ffmpeg wrapper
@@ -14,6 +15,7 @@ export class Ffmpeg {
   private readonly ffmpegBinary: Binary;
 
   constructor(
+    private readonly ffprobe: Ffprobe,
     private readonly callbacks?: {
       onProgressChange?: (progress: number) => void;
       onStatusChange?: (status: string) => void;
@@ -21,16 +23,22 @@ export class Ffmpeg {
   ) {
     this.ffmpegBinary =
       os.arch() === "arm64"
-        ? new Binary({
-            name: "ffmpeg",
-            sha256: "326895b16940f238d76e902fc71150f10c388c281985756f9850ff800a2f1499",
-            url: "https://www.osxexperts.net/ffmpeg7arm.zip",
-          })
-        : new Binary({
-            name: "ffmpeg",
-            sha256: "6a658787de8de14741acaedd14d5b81f7b44aef60711cbf7784208a2751933ec",
-            url: "https://www.osxexperts.net/ffmpeg7intel.zip",
-          });
+        ? new Binary(
+            {
+              name: "ffmpeg",
+              sha256: "326895b16940f238d76e902fc71150f10c388c281985756f9850ff800a2f1499",
+              url: "https://www.osxexperts.net/ffmpeg7arm.zip",
+            },
+            callbacks?.onStatusChange,
+          )
+        : new Binary(
+            {
+              name: "ffmpeg",
+              sha256: "6a658787de8de14741acaedd14d5b81f7b44aef60711cbf7784208a2751933ec",
+              url: "https://www.osxexperts.net/ffmpeg7intel.zip",
+            },
+            callbacks?.onStatusChange,
+          );
   }
 
   /**
@@ -51,43 +59,41 @@ export class Ffmpeg {
       throw new Error("Path to ffmpeg command included automatically. Start your command directly from arguments");
     }
 
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>(async (resolve, reject) => {
       this.callbacks?.onStatusChange?.(`Encoding ${path.basename(input)}`);
+
+      const durationInSeconds = await this.ffprobe.exec({
+        input,
+        params: ["-v error", "-show_entries format=duration", "-of default=noprint_wrappers=1:nokey=1"],
+      });
+      // @NOTE: ffmpeg uses milliseconds as nanoseconds for some reason
+      const durationInMilliseconds = parseFloat(durationInSeconds) * 1000 * 1000;
+
       const command = [`"${binary}"`, "-y", `-i "${input}"`, ...(params ?? []), "-progress pipe:1", `"${output}"`]
         .filter((param) => param != null)
         .join(" ");
       const ffmpegProcess = exec(command);
 
-      ffmpegProcess.stdout?.on("data", (data) => {
-        console.log(`ffmpeg stdout: ${data}`);
-      });
-
       /**
-       * Logging lines of the format:
-       * `ffmpeg stderr: frame=   68 fps=0.0 q=31.0 size=       0KiB time=00:00:01.10 bitrate=   0.3kbits/s speed=2.18x`
+       * Ffmpeg logs the progress as follows:
+       * frame=266 fps=240.97 stream_0_0_q=-1.0 bitrate= 254.7kbits/s total_size=140098 out_time_us=4400000 out_time_ms=4400000 out_time=00:00:04.400000 dup_frames=0 drop_frames=0 speed=3.99x progress=continue
+       * frame=266 fps=240.97 stream_0_0_q=-1.0 bitrate= 254.7kbits/s total_size=140098 out_time_us=4400000 out_time_ms=4400000 out_time=00:00:04.400000 dup_frames=0 drop_frames=0 speed=3.99x progress=end
        */
-      ffmpegProcess.stderr?.on("data", (data) => {
-        console.log(`ffmpeg stderr: ${data}`);
+      ffmpegProcess.stdout?.on("data", (data) => {
+        const parts = (data as string).split("\n");
+        let outTimeMs: string | undefined;
+        let progress: string | undefined;
 
-        if (typeof data === "string") {
-          if (data.includes("frame=") === false) {
-            return;
+        for (const part of parts) {
+          if (part.includes("out_time_ms=")) {
+            outTimeMs = part.split("=")[1];
+          } else if (part.includes("progress=")) {
+            progress = part.split("=")[1];
           }
+        }
 
-          const matcher = data.match(/frame=\s+(\d+)/);
-
-          if (matcher == null) {
-            return;
-          }
-
-          const currentFrame = matcher[1];
-          const parsedFrame = parseInt(currentFrame, 10);
-
-          if (Number.isNaN(parsedFrame)) {
-            return;
-          }
-
-          this.callbacks?.onProgressChange?.(parsedFrame);
+        if (outTimeMs != null) {
+          this.callbacks?.onProgressChange?.(parseFloat(outTimeMs) / durationInMilliseconds);
         }
       });
 
