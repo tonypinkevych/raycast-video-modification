@@ -11,13 +11,6 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Index",
-      "subtitle": "Convert selected videos to any format",
-      "description": "Template for showing a static list and a detail view",
-      "mode": "view"
-    },
-    {
       "name": "convert-to",
       "title": "Convert to ...",
       "subtitle": "Convert selected videos to any format",
