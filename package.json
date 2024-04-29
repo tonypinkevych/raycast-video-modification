@@ -13,14 +13,12 @@
     {
       "name": "convert-to",
       "title": "Convert to ...",
-      "subtitle": "Convert selected videos or gifs to mp4, webm or gif",
       "description": "The command takes no arguments and encodes the file in the selected folder.",
       "mode": "view"
     },
     {
       "name": "optimize",
       "title": "Optimize",
-      "subtitle": "Optimize selected videos",
       "description": "The command allows you to optimize the selected video according to the selected template. There are 3 templates available: lighter weight, optimal and best quality. Under the hood, these settings affect the bitrate. GIFs are not currently supported for optimization.",
       "mode": "no-view",
       "arguments": [
@@ -49,7 +47,6 @@
     {
       "name": "resize",
       "title": "Resize",
-      "subtitle": "Resize selected video or gif to the specifc size",
       "description": "Specify width or height. If one of them is not specified, the other will be calculated automatically to maintain the aspect ratio of the original.",
       "mode": "no-view",
       "arguments": [
