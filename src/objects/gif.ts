@@ -40,8 +40,6 @@ export class Gif {
         ],
         output: targetVideoPath,
       });
-    } catch (err) {
-      throw err;
     } finally {
       fs.rmSync(`${baseFolderPath}/palette.png`);
     }

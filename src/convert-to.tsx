@@ -48,11 +48,13 @@ export default function Command() {
     for (const video of selectedVideos) {
       try {
         await loggable(new Video(video, ffmpeg)).encode({ format: "mp4" });
-      } catch (err: any) {
-        await showToast({
-          title: err.message,
-          style: Toast.Style.Failure,
-        });
+      } catch (err) {
+        if (err instanceof Error) {
+          await showToast({
+            title: err.message,
+            style: Toast.Style.Failure,
+          });
+        }
         return;
       }
     }
@@ -77,11 +79,13 @@ export default function Command() {
     for (const video of selectedVideos) {
       try {
         await loggable(new Video(video, ffmpeg)).encode({ format: "webm" });
-      } catch (err: any) {
-        await showToast({
-          title: err.message,
-          style: Toast.Style.Failure,
-        });
+      } catch (err) {
+        if (err instanceof Error) {
+          await showToast({
+            title: err.message,
+            style: Toast.Style.Failure,
+          });
+        }
         return;
       }
     }
@@ -106,11 +110,13 @@ export default function Command() {
     for (const video of selectedVideos) {
       try {
         await loggable(new Gif(video, ffmpeg)).encode();
-      } catch (err: any) {
-        await showToast({
-          title: err.message,
-          style: Toast.Style.Failure,
-        });
+      } catch (err) {
+        if (err instanceof Error) {
+          await showToast({
+            title: err.message,
+            style: Toast.Style.Failure,
+          });
+        }
         return;
       }
     }
@@ -129,7 +135,7 @@ export default function Command() {
         title="mp4"
         actions={
           <ActionPanel>
-            <Action title="Start encoding" onAction={encodeMp4} />
+            <Action title="Convert Video" onAction={encodeMp4} />
           </ActionPanel>
         }
       />
@@ -139,7 +145,7 @@ export default function Command() {
         title="webm"
         actions={
           <ActionPanel>
-            <Action title="Start encoding" onAction={encodeWebm} />
+            <Action title="Convert Video" onAction={encodeWebm} />
           </ActionPanel>
         }
       />
@@ -149,7 +155,7 @@ export default function Command() {
         title="gif"
         actions={
           <ActionPanel>
-            <Action title="Start encoding" onAction={encodeGif} />
+            <Action title="Convert GIF" onAction={encodeGif} />
           </ActionPanel>
         }
       />

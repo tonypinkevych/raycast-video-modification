@@ -43,8 +43,8 @@ export default async function Command(props: { arguments: { width: string; heigh
   );
 
   for (const video of files) {
-    const width = !!providedWidth ? parseInt(providedWidth, 10) : undefined;
-    const height = !!providedHeight ? parseInt(providedHeight, 10) : undefined;
+    const width = providedWidth !== "" ? parseInt(providedWidth, 10) : undefined;
+    const height = providedHeight !== "" ? parseInt(providedHeight, 10) : undefined;
 
     try {
       const extension = path.extname(video.path());
@@ -53,8 +53,10 @@ export default async function Command(props: { arguments: { width: string; heigh
       } else {
         await loggable(new Video(video, ffmpeg)).encode({ width, height });
       }
-    } catch (err: any) {
-      await showToast({ title: err.message, style: Toast.Style.Failure });
+    } catch (err) {
+      if (err instanceof Error) {
+        await showToast({ title: err.message, style: Toast.Style.Failure });
+      }
       return;
     }
   }

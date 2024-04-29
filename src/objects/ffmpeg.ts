@@ -59,13 +59,14 @@ export class Ffmpeg {
       throw new Error("Path to ffmpeg command included automatically. Start your command directly from arguments");
     }
 
-    return new Promise<void>(async (resolve, reject) => {
+    const durationInSeconds = await this.ffprobe.exec({
+      input,
+      params: ["-v error", "-show_entries format=duration", "-of default=noprint_wrappers=1:nokey=1"],
+    });
+
+    return new Promise<void>((resolve, reject) => {
       this.callbacks?.onStatusChange?.(`Encoding ${path.basename(input)}`);
 
-      const durationInSeconds = await this.ffprobe.exec({
-        input,
-        params: ["-v error", "-show_entries format=duration", "-of default=noprint_wrappers=1:nokey=1"],
-      });
       // @NOTE: ffmpeg uses milliseconds as nanoseconds for some reason
       const durationInMilliseconds = parseFloat(durationInSeconds) * 1000 * 1000;
 
@@ -82,13 +83,10 @@ export class Ffmpeg {
       ffmpegProcess.stdout?.on("data", (data) => {
         const parts = (data as string).split("\n");
         let outTimeMs: string | undefined;
-        let progress: string | undefined;
 
         for (const part of parts) {
           if (part.includes("out_time_ms=")) {
             outTimeMs = part.split("=")[1];
-          } else if (part.includes("progress=")) {
-            progress = part.split("=")[1];
           }
         }
 

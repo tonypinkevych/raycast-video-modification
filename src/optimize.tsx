@@ -43,8 +43,10 @@ export default async function Command(props: { arguments: { preset: "smallest-si
       } else {
         await loggable(new Video(video, ffmpeg)).encode({ preset });
       }
-    } catch (err: any) {
-      await showToast({ title: err.message, style: Toast.Style.Failure });
+    } catch (err) {
+      if (err instanceof Error) {
+        await showToast({ title: err.message, style: Toast.Style.Failure });
+      }
       return;
     }
   }
