@@ -5,7 +5,6 @@ import { Ffprobe } from "./objects/ffprobe";
 import { Gif } from "./objects/gif";
 import { SelectedFinderFiles } from "./objects/selected-finder.videos";
 import { Video } from "./objects/video";
-import { loggable } from "./utils/loggable";
 
 export default async function Command(props: { arguments: { width: string; height: string } }) {
   const { width: providedWidth, height: providedHeight } = props.arguments;
@@ -22,24 +21,20 @@ export default async function Command(props: { arguments: { width: string; heigh
     return;
   }
 
-  const ffmpeg = loggable(
-    new Ffmpeg(
-      loggable(
-        new Ffprobe({
-          onStatusChange: async (status) => {
-            await showToast({ title: status, style: Toast.Style.Animated });
-          },
-        }),
-      ),
-      {
-        onStatusChange: async (status) => {
-          await showToast({ title: status, style: Toast.Style.Animated });
-        },
-        onProgressChange: (progress) => {
-          console.log(">>>", progress);
-        },
+  const ffmpeg = new Ffmpeg(
+    new Ffprobe({
+      onStatusChange: async (status) => {
+        await showToast({ title: status, style: Toast.Style.Animated });
       },
-    ),
+    }),
+    {
+      onStatusChange: async (status) => {
+        await showToast({ title: status, style: Toast.Style.Animated });
+      },
+      onProgressChange: (progress) => {
+        console.log(">>>", progress);
+      },
+    },
   );
 
   for (const video of files) {
@@ -49,9 +44,9 @@ export default async function Command(props: { arguments: { width: string; heigh
     try {
       const extension = path.extname(video.path());
       if (extension === ".gif") {
-        await loggable(new Gif(video, ffmpeg)).encode({ width, height });
+        await new Gif(video, ffmpeg).encode({ width, height });
       } else {
-        await loggable(new Video(video, ffmpeg)).encode({ width, height });
+        await new Video(video, ffmpeg).encode({ width, height });
       }
     } catch (err) {
       if (err instanceof Error) {

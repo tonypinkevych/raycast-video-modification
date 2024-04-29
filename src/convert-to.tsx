@@ -6,7 +6,6 @@ import { Ffprobe } from "./objects/ffprobe";
 import { Gif } from "./objects/gif";
 import { SelectedFinderFiles } from "./objects/selected-finder.videos";
 import { Video } from "./objects/video";
-import { loggable } from "./utils/loggable";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -14,25 +13,21 @@ export default function Command() {
   const [type, setType] = useState<"mp4" | "webm" | "gif" | undefined>();
   const { pop } = useNavigation();
 
-  const files = loggable(new SelectedFinderFiles());
-  const ffmpeg = loggable(
-    new Ffmpeg(
-      loggable(
-        new Ffprobe({
-          onStatusChange: async (status) => {
-            await showToast({ title: status, style: Toast.Style.Animated });
-          },
-        }),
-      ),
-      {
-        onStatusChange: async (status) => {
-          await showToast({ title: status, style: Toast.Style.Animated });
-        },
-        onProgressChange: (progress) => {
-          setProgress(progress);
-        },
+  const files = new SelectedFinderFiles();
+  const ffmpeg = new Ffmpeg(
+    new Ffprobe({
+      onStatusChange: async (status) => {
+        await showToast({ title: status, style: Toast.Style.Animated });
       },
-    ),
+    }),
+    {
+      onStatusChange: async (status) => {
+        await showToast({ title: status, style: Toast.Style.Animated });
+      },
+      onProgressChange: (progress) => {
+        setProgress(progress);
+      },
+    },
   );
 
   const encodeMp4 = async () => {
@@ -47,7 +42,7 @@ export default function Command() {
 
     for (const video of selectedVideos) {
       try {
-        await loggable(new Video(video, ffmpeg)).encode({ format: "mp4" });
+        await new Video(video, ffmpeg).encode({ format: "mp4" });
       } catch (err) {
         if (err instanceof Error) {
           await showToast({
@@ -78,7 +73,7 @@ export default function Command() {
 
     for (const video of selectedVideos) {
       try {
-        await loggable(new Video(video, ffmpeg)).encode({ format: "webm" });
+        await new Video(video, ffmpeg).encode({ format: "webm" });
       } catch (err) {
         if (err instanceof Error) {
           await showToast({
@@ -109,7 +104,7 @@ export default function Command() {
 
     for (const video of selectedVideos) {
       try {
-        await loggable(new Gif(video, ffmpeg)).encode();
+        await new Gif(video, ffmpeg).encode();
       } catch (err) {
         if (err instanceof Error) {
           await showToast({
@@ -132,7 +127,7 @@ export default function Command() {
     <List isLoading={isLoading}>
       <List.Item
         icon={progress != null && type === "mp4" ? getProgressIcon(progress, "#374FD5") : "list-icon.png"}
-        title="mp4"
+        title=".mp4"
         actions={
           <ActionPanel>
             <Action title="Convert Video" onAction={encodeMp4} />
@@ -142,7 +137,7 @@ export default function Command() {
 
       <List.Item
         icon={progress != null && type === "webm" ? getProgressIcon(progress, "#374FD5") : "list-icon.png"}
-        title="webm"
+        title=".webm"
         actions={
           <ActionPanel>
             <Action title="Convert Video" onAction={encodeWebm} />
@@ -152,7 +147,7 @@ export default function Command() {
 
       <List.Item
         icon={progress != null && type === "gif" ? getProgressIcon(progress, "#374FD5") : "list-icon.png"}
-        title="gif"
+        title=".gif"
         actions={
           <ActionPanel>
             <Action title="Convert GIF" onAction={encodeGif} />

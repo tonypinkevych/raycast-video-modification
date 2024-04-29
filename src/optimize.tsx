@@ -4,7 +4,6 @@ import { Ffmpeg } from "./objects/ffmpeg";
 import { Ffprobe } from "./objects/ffprobe";
 import { SelectedFinderFiles } from "./objects/selected-finder.videos";
 import { Video } from "./objects/video";
-import { loggable } from "./utils/loggable";
 
 export default async function Command(props: { arguments: { preset: "smallest-size" | "optimal" | "best-quality" } }) {
   const { preset } = props.arguments;
@@ -15,24 +14,20 @@ export default async function Command(props: { arguments: { preset: "smallest-si
     return;
   }
 
-  const ffmpeg = loggable(
-    new Ffmpeg(
-      loggable(
-        new Ffprobe({
-          onStatusChange: async (status) => {
-            await showToast({ title: status, style: Toast.Style.Animated });
-          },
-        }),
-      ),
-      {
-        onStatusChange: async (status) => {
-          await showToast({ title: status, style: Toast.Style.Animated });
-        },
-        onProgressChange: (progress) => {
-          console.log(">>>", progress);
-        },
+  const ffmpeg = new Ffmpeg(
+    new Ffprobe({
+      onStatusChange: async (status) => {
+        await showToast({ title: status, style: Toast.Style.Animated });
       },
-    ),
+    }),
+    {
+      onStatusChange: async (status) => {
+        await showToast({ title: status, style: Toast.Style.Animated });
+      },
+      onProgressChange: (progress) => {
+        console.log(">>>", progress);
+      },
+    },
   );
 
   for (const video of files) {
@@ -41,7 +36,7 @@ export default async function Command(props: { arguments: { preset: "smallest-si
       if (extension === ".gif") {
         throw new Error("Does not applicable to GIFs yet");
       } else {
-        await loggable(new Video(video, ffmpeg)).encode({ preset });
+        await new Video(video, ffmpeg).encode({ preset });
       }
     } catch (err) {
       if (err instanceof Error) {
