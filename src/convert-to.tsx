@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
 import { useState } from "react";
 import { Ffmpeg } from "./objects/ffmpeg";
@@ -126,7 +126,7 @@ export default function Command() {
   return (
     <List isLoading={isLoading}>
       <List.Item
-        icon={progress != null && type === "mp4" ? getProgressIcon(progress, "#374FD5") : "list-icon.png"}
+        icon={progress != null && type === "mp4" ? getProgressIcon(progress, "#374FD5") : Icon.ChevronRightSmall}
         title=".mp4"
         actions={
           <ActionPanel>
@@ -136,7 +136,7 @@ export default function Command() {
       />
 
       <List.Item
-        icon={progress != null && type === "webm" ? getProgressIcon(progress, "#374FD5") : "list-icon.png"}
+        icon={progress != null && type === "webm" ? getProgressIcon(progress, "#374FD5") : Icon.ChevronRightSmall}
         title=".webm"
         actions={
           <ActionPanel>
@@ -146,7 +146,7 @@ export default function Command() {
       />
 
       <List.Item
-        icon={progress != null && type === "gif" ? getProgressIcon(progress, "#374FD5") : "list-icon.png"}
+        icon={progress != null && type === "gif" ? getProgressIcon(progress, "#374FD5") : Icon.ChevronRightSmall}
         title=".gif"
         actions={
           <ActionPanel>
