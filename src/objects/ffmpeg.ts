@@ -91,6 +91,12 @@ export class Ffmpeg {
         }
 
         if (outTimeMs != null) {
+          // @NOTE: handle rare cases when parse happen incorrectly
+          const parsed = parseFloat(outTimeMs);
+          if (Number.isNaN(parsed)) {
+            return;
+          }
+
           this.callbacks?.onProgressChange?.(parseFloat(outTimeMs) / durationInMilliseconds);
         }
       });
