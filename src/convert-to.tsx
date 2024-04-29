@@ -33,16 +33,16 @@ export default function Command() {
   const encodeMp4 = async () => {
     setType("mp4");
     setIsLoading(true);
-    const selectedVideos = await files.list();
+    const selectedFiles = await files.list();
 
-    if (selectedVideos.length === 0) {
+    if (selectedFiles.length === 0) {
       await showToast({ title: "Please select any video in Finder", style: Toast.Style.Failure });
       return;
     }
 
-    for (const video of selectedVideos) {
+    for (const file of selectedFiles) {
       try {
-        await new Video(video, ffmpeg).encode({ format: "mp4" });
+        await new Video(file, ffmpeg).encode({ format: "mp4" });
       } catch (err) {
         if (err instanceof Error) {
           await showToast({
@@ -64,16 +64,16 @@ export default function Command() {
   const encodeWebm = async () => {
     setType("webm");
     setIsLoading(true);
-    const selectedVideos = await files.list();
+    const selectedFiles = await files.list();
 
-    if (selectedVideos.length === 0) {
+    if (selectedFiles.length === 0) {
       await showToast({ title: "Please select any video in Finder", style: Toast.Style.Failure });
       return;
     }
 
-    for (const video of selectedVideos) {
+    for (const file of selectedFiles) {
       try {
-        await new Video(video, ffmpeg).encode({ format: "webm" });
+        await new Video(file, ffmpeg).encode({ format: "webm" });
       } catch (err) {
         if (err instanceof Error) {
           await showToast({
@@ -95,16 +95,16 @@ export default function Command() {
   const encodeGif = async () => {
     setType("gif");
     setIsLoading(true);
-    const selectedVideos = await files.list();
+    const selectedFiles = await files.list();
 
-    if (selectedVideos.length === 0) {
+    if (selectedFiles.length === 0) {
       await showToast({ title: "Please select any video in Finder", style: Toast.Style.Failure });
       return;
     }
 
-    for (const video of selectedVideos) {
+    for (const file of selectedFiles) {
       try {
-        await new Gif(video, ffmpeg).encode();
+        await new Gif(file, ffmpeg).encode();
       } catch (err) {
         if (err instanceof Error) {
           await showToast({

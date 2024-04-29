@@ -37,16 +37,16 @@ export default async function Command(props: { arguments: { width: string; heigh
     },
   );
 
-  for (const video of files) {
+  for (const file of files) {
     const width = providedWidth !== "" ? parseInt(providedWidth, 10) : undefined;
     const height = providedHeight !== "" ? parseInt(providedHeight, 10) : undefined;
 
     try {
-      const extension = path.extname(video.path());
+      const extension = path.extname(file.path());
       if (extension === ".gif") {
-        await new Gif(video, ffmpeg).encode({ width, height });
+        await new Gif(file, ffmpeg).encode({ width, height });
       } else {
-        await new Video(video, ffmpeg).encode({ width, height });
+        await new Video(file, ffmpeg).encode({ width, height });
       }
     } catch (err) {
       if (err instanceof Error) {

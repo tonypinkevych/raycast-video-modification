@@ -30,13 +30,13 @@ export default async function Command(props: { arguments: { preset: "smallest-si
     },
   );
 
-  for (const video of files) {
+  for (const file of files) {
     try {
-      const extension = path.extname(video.path());
+      const extension = path.extname(file.path());
       if (extension === ".gif") {
         throw new Error("Does not applicable to GIFs yet");
       } else {
-        await new Video(video, ffmpeg).encode({ preset });
+        await new Video(file, ffmpeg).encode({ preset });
       }
     } catch (err) {
       if (err instanceof Error) {
