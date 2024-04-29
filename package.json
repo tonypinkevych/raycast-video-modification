@@ -49,7 +49,7 @@
     {
       "name": "resize",
       "title": "Resize",
-      "subtitle": "Resize selected video or gif to the specifc size.",
+      "subtitle": "Resize selected video or gif to the specifc size",
       "description": "Specify width or height. If one of them is not specified, the other will be calculated automatically to maintain the aspect ratio of the original.",
       "mode": "no-view",
       "arguments": [
