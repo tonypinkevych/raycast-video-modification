@@ -1,5 +1,4 @@
 import { Toast as RaycastToast, showToast } from "@raycast/api";
-import * as path from "path";
 import { Ffmpeg } from "./objects/ffmpeg";
 import { Ffprobe } from "./objects/ffprobe";
 import { SelectedFinderFiles } from "./objects/selected-finder.files";
@@ -34,8 +33,7 @@ export default async function Command(props: { arguments: { preset: "smallest-si
     }
 
     for (const file of files) {
-      const extension = path.extname(file.path());
-      if (extension === ".gif") {
+      if (file.extension() === ".gif") {
         throw new Error("Does not applicable to GIFs yet");
       }
 

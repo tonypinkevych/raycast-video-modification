@@ -1,14 +1,11 @@
 import { Toast as RaycastToast } from "@raycast/api";
-import * as path from "path";
 import { Ffmpeg } from "./objects/ffmpeg";
 import { Ffprobe } from "./objects/ffprobe";
 import { Gif } from "./objects/gif";
+import { SafeNumber } from "./objects/safe.number";
 import { SelectedFinderFiles } from "./objects/selected-finder.files";
 import { Toast } from "./objects/toast";
 import { Video } from "./objects/video";
-
-const stringToNumber = (stringifiedNumber: string): number | undefined =>
-  stringifiedNumber !== "" ? parseInt(stringifiedNumber, 10) : undefined;
 
 export default async function Command(props: { arguments: { width: string; height: string } }) {
   const { width: providedWidth, height: providedHeight } = props.arguments;
@@ -43,11 +40,10 @@ export default async function Command(props: { arguments: { width: string; heigh
     }
 
     for (const file of files) {
-      const width = stringToNumber(providedWidth);
-      const height = stringToNumber(providedHeight);
-      const extension = path.extname(file.path());
+      const width = new SafeNumber(providedWidth).toInt();
+      const height = new SafeNumber(providedHeight).toInt();
 
-      if (extension === ".gif") {
+      if (file.extension() === ".gif") {
         await new Gif(file, ffmpeg).encode({ width, height });
         continue;
       }
