@@ -8,7 +8,8 @@ import { Toast } from "./objects/toast";
 import { Video } from "./objects/video";
 
 export default async function Command(props: { arguments: { width: string; height: string } }) {
-  const { width: providedWidth, height: providedHeight } = props.arguments;
+  const width = new SafeNumber(props.arguments.width);
+  const height = new SafeNumber(props.arguments.height);
   const toast = new Toast();
   const ffmpeg = new Ffmpeg(
     new Ffprobe({
@@ -26,8 +27,11 @@ export default async function Command(props: { arguments: { width: string; heigh
     },
   );
 
-  if (!providedWidth && !providedHeight) {
-    await toast.show({ title: "Width or Height should be provided", style: RaycastToast.Style.Failure });
+  if (width.toInt() == null && height.toInt() == null) {
+    await toast.show({
+      title: "Please specify Width or Height and they must both be numbers",
+      style: RaycastToast.Style.Failure,
+    });
     return;
   }
 
@@ -40,15 +44,18 @@ export default async function Command(props: { arguments: { width: string; heigh
     }
 
     for (const file of files) {
-      const width = new SafeNumber(providedWidth).toInt();
-      const height = new SafeNumber(providedHeight).toInt();
-
       if (file.extension() === ".gif") {
-        await new Gif(file, ffmpeg).encode({ width, height });
+        await new Gif(file, ffmpeg).encode({
+          width: width.toInt(),
+          height: height.toInt(),
+        });
         continue;
       }
 
-      await new Video(file, ffmpeg).encode({ width, height });
+      await new Video(file, ffmpeg).encode({
+        width: width.toInt(),
+        height: height.toInt(),
+      });
     }
 
     await toast.show({ title: "All Videos are Processed", style: RaycastToast.Style.Success });
