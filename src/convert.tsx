@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Ffmpeg } from "./objects/ffmpeg";
 import { Ffprobe } from "./objects/ffprobe";
 import { Gif } from "./objects/gif";
-import { SelectedFinderFiles } from "./objects/selected-finder.files";
+import { FinderIsNotFrontmostApp, SelectedFinderFiles } from "./objects/selected-finder.files";
 import { Toast } from "./objects/toast";
 import { Video } from "./objects/video";
 
@@ -59,6 +59,11 @@ export default function Command() {
       await toast.show({ title: "All Videos are Processed", style: RaycastToast.Style.Success });
       pop();
     } catch (err) {
+      if (err instanceof FinderIsNotFrontmostApp) {
+        await toast.show({ title: "Please put Finder in focus and try again", style: RaycastToast.Style.Failure });
+        return;
+      }
+
       if (err instanceof Error) {
         console.error(err);
         await toast.show({ title: err.message, style: RaycastToast.Style.Failure });
