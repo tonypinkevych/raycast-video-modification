@@ -39,14 +39,14 @@ export default function Command() {
   const convertTo = async (format: Format) => {
     setType(format);
     setIsLoading(true);
-    const selectedFiles = await files.list();
-
-    if (selectedFiles.length === 0) {
-      await toast.show({ title: "Please select any Video in Finder", style: RaycastToast.Style.Failure });
-      return;
-    }
 
     try {
+      const selectedFiles = await files.list();
+
+      if (selectedFiles.length === 0) {
+        throw new Error("Please select any Video in Finder");
+      }
+
       for (const file of selectedFiles) {
         if (format === "gif") {
           await new Gif(file, ffmpeg).encode();
@@ -55,18 +55,19 @@ export default function Command() {
 
         await new Video(file, ffmpeg).encode({ format });
       }
+
+      await toast.show({ title: "All Videos are Processed", style: RaycastToast.Style.Success });
+      pop();
     } catch (err) {
       if (err instanceof Error) {
         console.error(err);
         await toast.show({ title: err.message, style: RaycastToast.Style.Failure });
       }
+    } finally {
+      setIsLoading(false);
+      setProgress(undefined);
+      setType(undefined);
     }
-
-    await toast.show({ title: "All Videos are Processed", style: RaycastToast.Style.Success });
-    setIsLoading(false);
-    setProgress(undefined);
-    setType(undefined);
-    pop();
   };
 
   return (

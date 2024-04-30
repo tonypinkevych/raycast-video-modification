@@ -1,4 +1,4 @@
-import { Toast as RaycastToast, showToast } from "@raycast/api";
+import { Toast as RaycastToast } from "@raycast/api";
 import { Ffmpeg } from "./objects/ffmpeg";
 import { Ffprobe } from "./objects/ffprobe";
 import { SelectedFinderFiles } from "./objects/selected-finder.files";
@@ -28,19 +28,18 @@ export default async function Command(props: { arguments: { preset: "smallest-si
     const files = await new SelectedFinderFiles().list();
 
     if (files.length === 0) {
-      await toast.show({ title: "Please select any Video in Finder", style: RaycastToast.Style.Failure });
-      return;
+      throw new Error("Please select any Video in Finder");
+    }
+
+    if (files.some((file) => file.extension() === ".gif")) {
+      throw new Error("Does not applicable to GIFs yet");
     }
 
     for (const file of files) {
-      if (file.extension() === ".gif") {
-        throw new Error("Does not applicable to GIFs yet");
-      }
-
       await new Video(file, ffmpeg).encode({ preset });
     }
 
-    await showToast({ title: "All Videos are Processed", style: RaycastToast.Style.Success });
+    await toast.show({ title: "All Videos are Processed", style: RaycastToast.Style.Success });
   } catch (err) {
     if (err instanceof Error) {
       console.error(err);

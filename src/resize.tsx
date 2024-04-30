@@ -27,20 +27,15 @@ export default async function Command(props: { arguments: { width: string; heigh
     },
   );
 
-  if (width.toInt() == null && height.toInt() == null) {
-    await toast.show({
-      title: "Please specify Width or Height and they must both be numbers",
-      style: RaycastToast.Style.Failure,
-    });
-    return;
-  }
-
   try {
+    if (width.toInt() == null && height.toInt() == null) {
+      throw new Error("Please specify Width or Height and they must both be numbers");
+    }
+
     const files = await new SelectedFinderFiles().list();
 
     if (files.length === 0) {
-      await toast.show({ title: "Please select any Video in Finder", style: RaycastToast.Style.Failure });
-      return;
+      throw new Error("Please select any Video in Finder");
     }
 
     for (const file of files) {
@@ -62,7 +57,7 @@ export default async function Command(props: { arguments: { width: string; heigh
   } catch (err) {
     if (err instanceof Error) {
       console.error(err);
-      await toast.show({ title: err.message, style: RaycastToast.Style.Success });
+      await toast.show({ title: err.message, style: RaycastToast.Style.Failure });
     }
   }
 }
