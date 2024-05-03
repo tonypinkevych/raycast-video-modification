@@ -1,6 +1,7 @@
 import path from "path";
 import { File, Video } from "../abstractions";
 import { Ffmpeg } from "./ffmpeg";
+import { FsFile } from "./fs.file";
 
 export class FfmpegVideo implements Video {
   constructor(
@@ -44,5 +45,26 @@ export class FfmpegVideo implements Video {
       ],
       output: targetVideoPath,
     });
+  };
+
+  stabilize: Video["stabilize"] = async () => {
+    const videoPath = this.file.path();
+    const sourceDirPath = path.dirname(videoPath);
+    const extension = this.file.extension();
+    const targetVideoPath = path.join(sourceDirPath, this.file.nextName({ extension }));
+
+    try {
+      await this.ffmpeg.exec({
+        input: videoPath,
+        params: ["-vf vidstabdetect=shakiness=4:accuracy=15 -f null -"],
+      });
+      await this.ffmpeg.exec({
+        input: videoPath,
+        params: ["-vf vidstabtransform=smoothing=12:zoom=0"],
+        output: targetVideoPath,
+      });
+    } finally {
+      await new FsFile(path.join(sourceDirPath, "transforms.trf")).remove();
+    }
   };
 }

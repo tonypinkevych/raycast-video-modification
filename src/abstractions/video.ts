@@ -5,4 +5,6 @@ export type Video = {
     height?: number;
     format?: "mp4" | "webm" | "mov";
   }) => Promise<void>;
+
+  stabilize: () => Promise<void>;
 };

@@ -45,7 +45,7 @@ export class Ffmpeg {
   /**
    * @todo add validations for params?
    */
-  exec: (payload: { input: string; output: string; params?: (string | undefined)[] }) => Promise<void> = async (
+  exec: (payload: { input: string; output?: string; params?: (string | undefined)[] }) => Promise<void> = async (
     payload,
   ) => {
     const { input, params, output } = payload;
@@ -71,7 +71,14 @@ export class Ffmpeg {
       // @NOTE: ffmpeg uses nanoseconds as milliseconds for some reason
       const durationInMilliseconds = parseFloat(durationInSeconds) * 1000 * 1000;
 
-      const command = [`"${binary}"`, "-y", `-i "${input}"`, ...(params ?? []), "-progress pipe:1", `"${output}"`]
+      const command = [
+        `"${binary}"`,
+        "-y",
+        `-i "${input}"`,
+        ...(params ?? []),
+        "-progress pipe:1",
+        output ? `"${output}"` : undefined,
+      ]
         .filter((param) => param != null)
         .join(" ");
       const ffmpegProcess = exec(command);

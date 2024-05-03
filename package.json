@@ -85,6 +85,12 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "stabilize",
+      "title": "Stabilize",
+      "description": "The command allows to stabilize video",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
