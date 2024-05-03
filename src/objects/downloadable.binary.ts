@@ -36,7 +36,7 @@ export class ModeChangingFailedException extends Error {
  *
  * @todo extract hardcoded dependencies to simplify testability.
  */
-export class FsBinary implements Binary {
+export class DownloadableBinary implements Binary {
   private readonly workingFolder: Folder;
 
   private readonly archiveFile: File & Archive;
